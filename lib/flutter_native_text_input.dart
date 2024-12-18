@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -285,13 +286,13 @@ class _NativeTextInputState extends State<NativeTextInput> {
     super.initState();
 
     _effectiveFocusNode.addListener(_focusNodeListener);
-    widget.controller?.addListener(_controllerListener);
+    // widget.controller?.addListener(_controllerListener);
   }
 
   @override
   void dispose() {
     _effectiveFocusNode.removeListener(_focusNodeListener);
-    widget.controller?.removeListener(_controllerListener);
+    // widget.controller?.removeListener(_controllerListener);
 
     _controller?.dispose();
     _focusNode?.dispose();
@@ -305,21 +306,22 @@ class _NativeTextInputState extends State<NativeTextInput> {
       channel.invokeMethod(_effectiveFocusNode.hasFocus ? "focus" : "unfocus");
     }
   }
+  // We removed this as it would cause the text to be set in native android when the user is typing, leading to the cursor jumping to the start of the text
 
-  Future<void> _controllerListener() async {
-    final MethodChannel channel = await _channel.future;
-    channel.invokeMethod(
-      "setText",
-      {"text": widget.controller?.text ?? ''},
-    );
-    channel.invokeMethod("getContentHeight").then((value) {
-      if (value != null && value != _contentHeight) {
-        setState(() {
-          _contentHeight = value;
-        });
-      }
-    });
-  }
+  // Future<void> _controllerListener() async {
+  //   final MethodChannel channel = await _channel.future;
+  //   channel.invokeMethod(
+  //     "setText",
+  //     {"text": widget.controller?.text ?? ''},
+  //   );
+  //   channel.invokeMethod("getContentHeight").then((value) {
+  //     if (value != null && value != _contentHeight) {
+  //       setState(() {
+  //         _contentHeight = value;
+  //       });
+  //     }
+  //   });
+  // }
 
   Widget _platformView(BoxConstraints layout) {
     switch (defaultTargetPlatform) {
@@ -427,7 +429,10 @@ class _NativeTextInputState extends State<NativeTextInput> {
       "width": constraints.maxWidth,
     };
 
-    if (widget.style != null && widget.style?.fontSize != null) {
+    if (widget.style != null &&
+        widget.style?.fontSize != null &&
+        // Setting fontSize on Android causes the text to overlap with multiline input
+        !Platform.isAndroid) {
       params = {
         ...params,
         "fontSize": widget.style?.fontSize,
@@ -482,7 +487,7 @@ class _NativeTextInputState extends State<NativeTextInput> {
       params = {
         ...params,
         "placeholderFontFamily":
-        widget.iosOptions?.placeholderStyle?.fontFamily.toString(),
+            widget.iosOptions?.placeholderStyle?.fontFamily.toString(),
       };
     }
 
