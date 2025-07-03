@@ -167,10 +167,11 @@ internal class NativeTextInput(context: Context, id: Int, creationParams: Map<St
 
         if (creationParams.get("keyboardType") != null) {
             val keyboardType = creationParams.get("keyboardType") as String
-            if (keyboardType == "KeyboardType.numbersAndPunctuation" ||
-                    keyboardType == "KeyboardType.numberPad" ||
-                    keyboardType == "KeyboardType.asciiCapableNumberPad") {
+            if (keyboardType == "KeyboardType.numberPad" ||
+                keyboardType == "KeyboardType.asciiCapableNumberPad") {
                 editText.inputType = InputType.TYPE_CLASS_NUMBER
+            } else if (keyboardType == "KeyboardType.numbersAndPunctuation") {
+                editText.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_NUMBER_FLAG_SIGNED
             } else if (keyboardType == "KeyboardType.phonePad") {
                 editText.inputType = InputType.TYPE_CLASS_PHONE
             } else if (keyboardType == "KeyboardType.decimalPad") {
